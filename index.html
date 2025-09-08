@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Python e HTML Juntos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #4b8bbe;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        section {
+            margin-bottom: 40px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #4b8bbe;
+        }
+
+        pre {
+            background: #eee;
+            padding: 15px;
+            border-left: 5px solid #4b8bbe;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        code {
+            font-family: Consolas, monospace;
+        }
+
+        a {
+            color: #4b8bbe;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.9em;
+            padding: 20px;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Python e HTML Juntos: Uma Dupla Poderosa na Web</h1>
+    </header>
+
+    <main>
+        <section>
+            <p>Python e HTML são linguagens com propósitos diferentes, mas quando combinadas, tornam-se a base da
+                maioria das aplicações web modernas. Pense no HTML como o esqueleto de um site e no Python como o
+                cérebro que faz tudo funcionar por trás das cenas.</p>
+        </section>
+
+        <section>
+            <h2>O que é HTML? (A Estrutura da Página)</h2>
+            <p>HTML (HyperText Markup Language) é a linguagem padrão para criar páginas web.</p>
+
+            <h3>Exemplo Simples de HTML:</h3>
+            <pre><code><!DOCTYPE html>
+<html>
+<head>
+   <title>Minha Primeira Página</title>
+</head>
+<body>
+   <h1>Bem-vindo ao meu site!</h1>
+   <p>Este é um parágrafo de exemplo.</p>
+   <a href="https://www.google.com"></a>Ir para o Google</a>
+</body>
+</html>
+</code></pre>
+            <p><strong>
+                    <h1>
+                </strong> é um título principal. <strong>
+                    <p>
+                </strong> é um parágrafo.
+                <strong><a></strong> é um link.
+            </p>
+        </section>
+
+        <section>
+            <h2>O que é Python? (A Lógica por Trás da Cena)</h2>
+            <p>Python é uma linguagem versátil usada no backend das aplicações web. Ela processa dados, interage com
+                bancos e executa lógica de negócio.</p>
+
+            <h3>Exemplo Simples de Python:</h3>
+            <pre><code>nome = "Mundo"
+mensagem = f"Olá, {nome}!"
+print(mensagem)</code></pre>
+        </section>
+
+        <section>
+            <h2>Como Eles Trabalham Juntos? (O Backend e o Frontend)</h2>
+            <p>Python e HTML se conectam via frameworks como Flask ou Django. O Python processa dados e gera HTML
+                dinâmico para o navegador.</p>
+            <ul>
+                <li>Python lida com lógica e dados.</li>
+                <li>HTML exibe a interface para o usuário.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Exemplo Prático: Uma Página de Saudação Personalizada</h2>
+
+            <h3>Instale o Flask:</h3>
+            <pre><code>pip install Flask</code></pre>
+
+            <h3>app.py:</h3>
+            <pre><code>from flask import Flask, render_template_string
+from datetime import datetime
+
+app = Flask(__name__)
+
+def get_current_time():
+    return datetime.now().strftime("%H:%M:%S em %d/%m/%Y")
+
+@app.route('/')
+def home():
+    nome_usuario = "Visitante"
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Saudação Personalizada</title>
+    </head>
+    <body>
+        <h1>Olá, {nome_usuario}!</h1>
+        <p>Bem-vindo à sua página personalizada.</p>
+        <p>A data e hora atual é: {get_current_time()}</p>
+    </body>
+    </html>
+    """
+    return render_template_string(html_content)
+
+if __name__ == '__main__':
+    app.run(debug=True)</code></pre>
+            <p>Abra no navegador: <code>http://127.0.0.1:5000/</code> para ver a página personalizada.</p>
+        </section>
+
+        <section>
+            <h2>Templates com Jinja2</h2>
+            <p>Com Jinja2, usamos arquivos HTML com placeholders.</p>
+
+            <h3>index.html:</h3>
+            <pre><code><!DOCTYPE html>
+<html>
+<head>
+  <title>Saudação com Template</title>
+</head>
+<body>
+   <h1>Olá, {{ nome }}!</h1>
+   <p>Você está acessando a página agora: {{ data_hora }}.</p>
+</body>
+</html>
+</code></pre>
+
+            <h3>Python com Jinja2:</h3>
+            <pre><code>from flask import Flask, render_template
+from datetime import datetime
+
+app = Flask(__name__)
+
+@app.route('/')
+def home_template():
+    nome_usuario = "Aventureiro"
+    data_atual = datetime.now().strftime("%H:%M:%S em %d/%m/%Y")
+    return render_template('index.html', nome=nome_usuario, data_hora=data_atual)</code></pre>
+        </section>
+
+        <section>
+            <h2>Resumo Final</h2>
+            <ul>
+                <li><strong>HTML:</strong> Estrutura da página (o que você vê).</li>
+                <li><strong>Python:</strong> Lógica e dados (o que acontece nos bastidores).</li>
+                <li>Combinados, eles criam aplicações web poderosas, dinâmicas e interativas.</li>
+            </ul>
+        </section>
+    </main>
+    <button onclick="window.location.href='Pg2.html'" style="
+          background-color: #007bff; 
+          color: white; 
+          border: none; 
+          padding: 12px 24px; 
+          border-radius: 6px; 
+          cursor: pointer; 
+          font-size: 16px;
+          font-weight: bold;
+        ">
+        Ir para a Calculadora de IMC
+    </button>
+
+
+    <footer>
+        <p>Desenvolvido para fins educacionais - Python & HTML</p>
+    </footer>
+
+</body>
+
+</html>

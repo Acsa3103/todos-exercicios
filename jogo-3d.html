@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jogo de Corrida 3D</title>
+<style>
+  body { margin: 0; overflow: hidden; background: #87ceeb; font-family: Arial, sans-serif; }
+  #hud {
+    position: absolute;
+    top: 10px; left: 10px;
+    color: white;
+    font-size: 20px;
+    z-index: 10;
+    text-shadow: 0 0 5px black;
+  }
+  #gameOverScreen {
+    display: none;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+    padding-top: 30vh;
+    z-index: 100;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="hud">
+  Tempo: <span id="tempo">0</span> | Pontuação: <span id="pontos">0</span>
+</div>
+
+<div id="gameOverScreen">Game Over!<br>Sua pontuação: <span id="finalScore">0</span><br><br><button onclick="location.reload()">Jogar Novamente</button></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+
+<script>
+  // === ÁUDIO ===
+  const trafficSound = new Audio('Carro.mp3');
+  trafficSound.loop = true;
+  trafficSound.volume = 0.3;
+
+  const crashSound = new Audio('Batida.mp3');
+  crashSound.volume = 1.0;
+
+  let audioStarted = false;
+  function startAudio() {
+    if (!audioStarted) {
+      trafficSound.play().catch(() => { /* ignora erros */ });
+      audioStarted = true;
+    }
+  }
+  window.addEventListener('keydown', startAudio, { once: true });
+  window.addEventListener('click', startAudio, { once: true });
+
+
+  // Configurações iniciais
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 10, 15);
+  camera.lookAt(0, 0, -10);
+
+  const renderer = new THREE.WebGLRenderer({antialias: true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  // Luz
+  const light = new THREE.DirectionalLight(0xffffff, 1);
+  light.position.set(0, 20, 10);
+  scene.add(light);
+
+  // Geometria e material da pista
+  const pistaGeo = new THREE.PlaneGeometry(10, 200);
+  const pistaMat = new THREE.MeshPhongMaterial({color: 0x333333});
+
+  // Duas pistas para estrada infinita
+  const pista1 = new THREE.Mesh(pistaGeo, pistaMat);
+  pista1.rotation.x = -Math.PI / 2;
+  pista1.position.z = 0;
+  scene.add(pista1);
+
+  const pista2 = new THREE.Mesh(pistaGeo, pistaMat);
+  pista2.rotation.x = -Math.PI / 2;
+  pista2.position.z = -200;
+  scene.add(pista2);
+
+  // Linhas laterais da pista (fixas na cena)
+  const lineGeo = new THREE.BoxGeometry(0.2, 0.1, 200);
+  const lineMat = new THREE.MeshBasicMaterial({color: 0xffffff});
+  const lineLeft = new THREE.Mesh(lineGeo, lineMat);
+  lineLeft.position.set(-5, 0.05, 0);
+  scene.add(lineLeft);
+
+  const lineRight = lineLeft.clone();
+  lineRight.position.x = 5;
+  scene.add(lineRight);
+
+  // Carrinho (caixa vermelha)
+  const cartGeo = new THREE.BoxGeometry(2, 1, 4);
+  const cartMat = new THREE.MeshPhongMaterial({color: 0xff0000});
+  const cart = new THREE.Mesh(cartGeo, cartMat);
+  cart.position.y = 0.5;
+  cart.position.z = 5; // fica fixo no eixo Z
+  scene.add(cart);
+
+  // Obstáculos (caixas amarelas)
+  const obstacles = [];
+  const obsGeo = new THREE.BoxGeometry(2, 2, 2);
+  const obsMat = new THREE.MeshPhongMaterial({color: '#FFFF00'  });
+
+  // Última posição Z do último obstáculo para espaçamento
+  let lastObstacleZ = -100;
+
+  // Função para spawnar obstáculos espalhados
+  function spawnObstacle() {
+    const obs = new THREE.Mesh(obsGeo, obsMat);
+    obs.position.y = 1;
+
+    // Espaçamento mínimo na direção Z
+    const minDistanceZ = 15;
+    // Garante que o próximo obstáculo fique mais à frente com espaçamento
+    lastObstacleZ -= minDistanceZ + Math.random() * 20;
+    obs.position.z = lastObstacleZ;
+
+    // X aleatório na pista entre -4 e 4 (mais espalhado)
+    obs.position.x = (Math.random() * 8) - 4;
+
+    scene.add(obs);
+    obstacles.push(obs);
+  }
+
+  // Spawn inicial 20 obstáculos para mais espaçamento e desafio
+  for (let i = 0; i < 20; i++) spawnObstacle();
+
+  // Controle do carrinho
+  const keys = {};
+  window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
+  window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+
+  // Variáveis do jogo
+  const speed = 0.8;   // velocidade aumentada
+  let pontos = 0;
+  let tempo = 0;
+
+  const pontosDisplay = document.getElementById('pontos');
+  const tempoDisplay = document.getElementById('tempo');
+
+  const gameOverScreen = document.getElementById('gameOverScreen');
+  const finalScore = document.getElementById('finalScore');
+
+  let gameOver = false;
+
+  // Colisão simples - verifica distância
+  function colisao(obj1, obj2, dist) {
+    const dx = obj1.position.x - obj2.position.x;
+    const dz = obj1.position.z - obj2.position.z;
+    return (dx*dx + dz*dz) < (dist*dist);
+  }
+
+  // Função para finalizar o jogo
+  function finishGame() {
+    gameOver = true;
+    finalScore.textContent = Math.floor(pontos);
+    gameOverScreen.style.display = 'block';
+
+    trafficSound.pause();
+    crashSound.play();
+  }
+
+  // Loop do jogo
+  function animate() {
+    if (gameOver) return;
+
+    requestAnimationFrame(animate);
+
+    // Movimento lateral do carrinho
+    if (keys['arrowleft'] || keys['a']) {
+      cart.position.x -= 0.3;
+    }
+    if (keys['arrowright'] || keys['d']) {
+      cart.position.x += 0.3;
+    }
+    // Limita carrinho dentro da pista
+    cart.position.x = Math.min(4, Math.max(-4, cart.position.x));
+
+    // Move as duas pistas para frente (efeito estrada infinita)
+    pista1.position.z += speed;
+    pista2.position.z += speed;
+
+    // Reposiciona as pistas quando saem da vista (loop infinito)
+    if (pista1.position.z > camera.position.z + 100) {
+      pista1.position.z = pista2.position.z - 200;
+    }
+    if (pista2.position.z > camera.position.z + 100) {
+      pista2.position.z = pista1.position.z - 200;
+    }
+
+    // Move a câmera junto com o carrinho (mais atrás e para cima)
+    camera.position.z = cart.position.z + 15;
+    camera.position.x = cart.position.x;
+    camera.lookAt(cart.position.x, cart.position.y, cart.position.z - 10);
+
+    // Move obstáculos junto com pista
+    obstacles.forEach(obs => {
+      obs.position.z += speed;
+
+      // Reposiciona obstáculos à frente quando passam atrás da câmera
+      if (obs.position.z > camera.position.z + 10) {
+        lastObstacleZ -= 15 + Math.random() * 20;
+        obs.position.z = lastObstacleZ;
+        obs.position.x = (Math.random() * 8) - 4;
+      }
+
+      // Verifica colisão
+      if (colisao(cart, obs, 2)) {
+        finishGame();
+      }
+    });
+
+    // Incrementa pontuação baseada na distância percorrida
+    pontos += speed;
+    pontosDisplay.textContent = Math.floor(pontos);
+
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  // Timer do jogo (cronômetro que conta para cima)
+  const timer = setInterval(() => {
+    if (gameOver) {
+      clearInterval(timer);
+      return;
+    }
+    tempo++;
+    tempoDisplay.textContent = tempo;
+  }, 1000);
+
+  // Redimensiona renderer com a janela
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
+
+</body>
+</html>

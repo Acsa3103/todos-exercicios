@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aluguel de Veículos</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #fff9c4; /* amarelo clarinho */
+    }
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: #2133f3; /* azul */
+      color: white;
+      padding: 15px;
+      text-align: center;
+      z-index: 1000;
+    }
+    main {
+      padding: 100px 20px 20px;
+    }
+    .login, .lista-veiculos, .pedido {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .veiculo-item {
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .veiculo-item:last-child { border: none; }
+    button {
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Aluguel de Veículos</h1>
+</header>
+
+<main>
+  <!-- Página de Login -->
+  <div class="login" id="login-page">
+    <h2>Login Admin</h2>
+    <input type="text" id="username" placeholder="Usuário" /><br/><br/>
+    <input type="password" id="password" placeholder="Senha" /><br/><br/>
+    <button onclick="login()">Entrar</button>
+    <p id="login-error" style="color: red;"></p>
+  </div>
+
+  <!-- Página Inicial (lista de veículos) -->
+  <div class="lista-veiculos hidden" id="home-page">
+    <h2>Escolha um Veículo</h2>
+    <div class="veiculo-item">
+      <div>
+        <img src="carro1.jpg" alt="Carro 1">
+        <p>Carro 1 - Econômico</p>
+      </div>
+      <button onclick="selecionarVeiculo('Carro 1')">Selecionar</button>
+    </div>
+    <div class="veiculo-item">
+      <div>
+        <img src="carro2.jpg" alt="Carro 2">
+        <p>Carro 2 - SUV</p>
+      </div>
+      <button onclick="selecionarVeiculo('Carro 2')">Selecionar</button>
+    </div>
+    <!-- Adicione mais veículos conforme necessário -->
+  </div>
+
+  <!-- Página de Pedido -->
+  <div class="pedido hidden" id="pedido-page">
+    <h2>Dados do Motorista</h2>
+    <p id="veiculo-selecionado"></p>
+    <input type="text" id="nome-motorista" placeholder="Nome do motorista" /><br/><br/>
+    <input type="text" id="cnh-motorista" placeholder="Número da CNH" /><br/><br/>
+    <button onclick="finalizarPedido()">Finalizar Pedido</button>
+  </div>
+</main>
+
+<script>
+  function login() {
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    const err = document.getElementById('login-error');
+    if (user === 'Admin' && pass === '123@4') {
+      document.getElementById('login-page').classList.add('hidden');
+      document.getElementById('home-page').classList.remove('hidden');
+      err.textContent = '';
+    } else {
+      err.textContent = 'Usuário ou senha inválidos!';
+    }
+  }
+
+  let veiculoSelecionado = '';
+
+  function selecionarVeiculo(nome) {
+    veiculoSelecionado = nome;
+    document.getElementById('home-page').classList.add('hidden');
+    document.getElementById('pedido-page').classList.remove('hidden');
+    document.getElementById('veiculo-selecionado').textContent = 'Veículo: ' + nome;
+  }
+
+  function finalizarPedido() {
+    const nome = document.getElementById('nome-motorista').value;
+    const cnh = document.getElementById('cnh-motorista').value;
+    if (!nome || !cnh) {
+      alert('Por favor, preencha nome e CNH do motorista.');
+      return;
+    }
+    alert(`Aluguel efetuado!\nVeículo: ${veiculoSelecionado}\nMotorista: ${nome}\nCNH: ${cnh}`);
+    // Aqui você pode redirecionar ou limpar formulários, etc.
+    // por ora, volta à tela inicial:
+    document.getElementById('pedido-page').classList.add('hidden');
+    document.getElementById('home-page').classList.remove('hidden');
+    document.getElementById('nome-motorista').value = '';
+    document.getElementById('cnh-motorista').value = '';
+  }
+</script>
+
+</body>
+</html>

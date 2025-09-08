@@ -1,0 +1,28 @@
+/* Estilo para o corpo da página */
+body {
+  background: lightgrey; /* Cor de fundo cinza claro */
+  font: normal 15pt Arial; /* Fonte Arial, tamanho 15pt */
+}
+
+/* Estilo para o cabeçalho */
+header {
+  color: rgb(0, 0, 0); /* Cor do texto branca */
+  text-align: center; /* Alinha o texto ao centro */
+}
+
+/* Estilo para a seção principal */
+section {
+  background: white; /* Cor de fundo branca */
+  border-radius: 10px; /* Bordas arredondadas */
+  padding: 15px; /* Espaçamento interno de 15px */
+  width: 500px; /* Largura de 500px */
+  margin: auto; /* Centraliza a seção na página */
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.329); /* Sombra suave */
+}
+
+/* Estilo para o rodapé */
+footer {
+  color: rgb(0, 0, 0); /* Cor do texto branca */
+  text-align: center; /* Alinha o texto ao centro */
+  font-style: italic; /* Estilo de fonte itálico */
+}

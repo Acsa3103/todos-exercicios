@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculo de saldo</title>
+</head>
+<body>
+    <br><label for="salario">Salário</label><br>
+    <input type="number" id="salario">
+    
+    <br><br><label for="Despesa1">Despesa</label><br>
+    <input type="number" id="Despesa1">
+
+    <br><br><label for="Despesa2">Outra despesa</label><br>
+    <input type="number" id="Despesa2">
+
+    <br><br><label for="Despesa3">Mais uma despesa</label><br>
+    <input type="number" id="Despesa3">
+
+    <br><br><button onclick="calcularsaldo()">Calcular saldo</button>
+
+    <script>
+        function calcularsaldo(){
+            var salario=parseFloat(document.getElementById("salario").value);
+            var Despesa1=parseFloat(document.getElementById("Despesa1").value);
+            var Despesa2=parseFloat(document.getElementById("Despesa2").value);
+            var Despesa3=parseFloat(document.getElementById("Despesa3").value);
+            
+            var saldo=salario-Despesa1-Despesa2-Despesa3;
+            var totaldes=Despesa1+Despesa2+Despesa3;
+            var percent1=(Despesa1/totaldes)*100;
+            var percent2=(Despesa2/totaldes)*100;
+            var percent3=(Despesa3/totaldes)*100;
+            
+            document.getElementById("saldo").textContent=saldo.toFixed(2);
+            document.getElementById("totaldes").textContent=totaldes.toFixed(2);
+            document.getElementById("percent1").textContent=percent1.toFixed(0)+"%";
+            document.getElementById("percent2").textContent=percent2.toFixed(0)+"%";
+            document.getElementById("percent3").textContent=percent3.toFixed(0)+"%";
+        }
+    </script>
+    <p>Saldo: <span id="saldo"></span></p>
+    <p>Total de despesas: <span id="totaldes"></span></p>
+    <p>Percentual1: <span id="percent1"></span></p>
+    <p>Percentual2: <span id="percent2"></span></p>
+    <p>Percentual3: <span id="percent3"></span></p>
+    
+</body>
+</html>
